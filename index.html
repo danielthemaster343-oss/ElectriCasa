@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#101820">
+<title>ElectriCasa</title>
+<style>
+:root{--bg:#101820;--panel:#182630;--panel2:#203440;--line:#34505d;--text:#edf5f7;--muted:#9eb4bc;--accent:#f7b538;--green:#50d890;--red:#ff6b6b;--blue:#56b4e9}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px system-ui,-apple-system,Segoe UI,sans-serif}
+header{padding:15px 16px;background:#0c1319;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:10px}.logo{width:38px;height:38px;border-radius:12px;background:var(--accent);color:#15202a;display:grid;place-items:center;font-size:22px;font-weight:900}
+h1{font-size:18px;margin:0;letter-spacing:.2px}header small{color:var(--muted)}button,select,input{font:inherit}button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:10px;padding:9px 12px;cursor:pointer}button:active{transform:scale(.98)}button.primary{background:var(--accent);color:#18222a;border-color:var(--accent);font-weight:800}button.danger{border-color:#814b4b;color:#ffaaaa}button.active{outline:2px solid var(--accent)}
+main{max-width:1180px;margin:auto;padding:14px;display:grid;grid-template-columns:280px minmax(0,1fr);gap:14px}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:14px;min-width:0}.panel h2{font-size:14px;margin:0 0 12px;text-transform:uppercase;letter-spacing:1px;color:#c5d7dd}
+.tools{display:grid;grid-template-columns:1fr 1fr;gap:8px}.tools button{min-height:66px;text-align:left;display:flex;flex-direction:column;justify-content:center;gap:5px}.tools b{font-size:20px}.tools span{font-size:12px;color:var(--muted)}
+.field{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:10px 0;color:var(--muted)}input[type=number],input[type=text],select{width:110px;background:#101a21;color:var(--text);border:1px solid var(--line);padding:8px;border-radius:8px}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.workspace{display:flex;flex-direction:column;gap:12px}.topbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.tabs{display:flex;gap:6px;flex-wrap:wrap}.status{font-size:12px;color:var(--muted)}.canvasWrap{background:#0b1218;border:1px solid var(--line);border-radius:16px;overflow:hidden;position:relative;min-height:400px}.canvasWrap canvas{display:block;width:100%;height:auto;touch-action:manipulation}.hint{padding:10px 13px;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.stat{padding:12px;background:var(--panel);border:1px solid var(--line);border-radius:12px}.stat small{display:block;color:var(--muted);margin-bottom:5px}.stat strong{font-size:20px}.circuits{display:grid;grid-template-columns:1fr 1fr;gap:10px}.circuit{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:13px}.circuit h3{margin:0 0 8px;font-size:14px}.circuit p{color:var(--muted);font-size:12px;line-height:1.5;margin:6px 0}.breaker{display:flex;align-items:center;justify-content:space-between;gap:8px}.switch{min-width:74px}.switch.on{background:#174c39;border-color:#2c9c6d}.switch.off{background:#48282a;border-color:#b85050}
+.log{font-size:12px;line-height:1.6;color:var(--muted);padding-left:18px}.note{font-size:12px;color:var(--muted);line-height:1.5}.warning{border:1px solid #86652b;background:#382d17;color:#ffe0a0;border-radius:12px;padding:11px;font-size:12px;line-height:1.5}.componentList{display:flex;flex-direction:column;gap:6px}.componentRow{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px;background:#101a21;border-radius:9px;font-size:12px}.componentRow button{padding:4px 8px}.empty{color:var(--muted);font-size:12px}
+@media(max-width:760px){main{grid-template-columns:1fr;padding:9px}.side{order:2}.workspace{order:1}.canvasWrap{min-height:280px}.stats{grid-template-columns:repeat(3,1fr)}.stat strong{font-size:17px}header{padding:12px}.circuits{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.circuits{grid-template-columns:1fr}.topbar{align-items:flex-start}.stats{gap:5px}.stat{padding:9px}.stat strong{font-size:16px}}
+</style>
+</head>
+<body>
+<header><div class="brand"><div class="logo">ϟ</div><div><h1>ElectriCasa</h1><small>Laboratorio eléctrico residencial · v0.6</small></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end"><button id="exportBtn">Exportar respaldo</button><button id="importBtn">Importar</button><button class="primary" id="saveBtn">Guardar proyecto</button><input id="importFile" type="file" accept=".json,application/json" hidden></div></header>
+<main>
+<aside class="panel side">
+<h2>Agregar al plano</h2>
+<div class="tools">
+<button data-add="light"><b>💡</b><span>Foco</span></button>
+<button data-add="switch"><b>◉</b><span>Apagador</span></button>
+<button data-add="outlet"><b>▣</b><span>Contacto</span></button>
+<button data-add="panel"><b>▤</b><span>Tablero</span></button>
+<button data-add="junction"><b>●</b><span>Registro</span></button>
+<button data-add="wire"><b>〰</b><span>Modo cable</span></button>
+</div>
+<h2 style="margin-top:20px">Conductor del cable</h2>
+<label class="field">Tipo de línea<select id="wireColor"><option value="#f7b538">Fase · amarillo</option><option value="#56b4e9">Neutro · azul</option><option value="#50d890">Tierra · verde</option></select></label>
+<p class="note">Cada conexión lleva un conductor identificado. La revisión es didáctica y no sustituye un cálculo profesional.</p>
+<h2 style="margin-top:20px">Vivienda</h2>
+<label class="field">Ancho (m)<input id="roomW" type="number" min="2" max="20" value="8"></label>
+<label class="field">Largo (m)<input id="roomH" type="number" min="2" max="20" value="10"></label>
+<button id="resizeBtn" style="width:100%">Actualizar dimensiones</button>
+<h2 style="margin-top:20px">Elementos</h2>
+<div id="componentList" class="componentList"><div class="empty">Todavía no hay elementos.</div></div>
+<div class="actions"><button id="operateBtn">Accionar seleccionado</button><button id="deleteBtn" class="danger">Eliminar seleccionado</button><button id="clearBtn">Limpiar plano</button></div>
+<p class="note">Selecciona un apagador y pulsa “Accionar seleccionado”: abrirlo o cerrarlo actualiza los focos alcanzables en el recorrido dibujado desde el tablero.</p>
+</aside>
+<section class="workspace">
+<div class="topbar"><div class="tabs"><button class="active" data-tab="plan">Plano 2D</button><button data-tab="circuits">Circuitos</button><button data-tab="report">Reporte</button></div><div class="status" id="modeLabel">Modo: seleccionar</div></div>
+<div id="planView" class="canvasWrap"><canvas id="plan" width="900" height="610"></canvas><div class="hint">Toca un elemento para seleccionarlo. Selecciona una herramienta y toca el plano para colocarla. En modo cable, toca dos elementos para conectarlos.</div></div>
+<div id="circuitView" hidden>
+<div class="stats"><div class="stat"><small>Carga estimada</small><strong id="totalW">0 W</strong></div><div class="stat"><small>Corriente estimada</small><strong id="totalA">0 A</strong></div><div class="stat"><small>Elementos</small><strong id="totalN">0</strong></div></div>
+<div class="circuits" style="margin-top:12px">
+<div class="circuit"><h3>💡 C1 · Iluminación</h3><p id="c1info">Sin cargas asignadas.</p><div class="breaker"><span>Pastilla virtual</span><button class="switch on" id="b1">CONECTADA</button></div><p id="c1state">Circuito energizado (simulación).</p></div>
+<div class="circuit"><h3>▣ C2 · Contactos</h3><p id="c2info">Sin cargas asignadas.</p><div class="breaker"><span>Pastilla virtual</span><button class="switch on" id="b2">CONECTADA</button></div><p id="c2state">Circuito energizado (simulación).</p></div>
+</div>
+<div class="actions"><button class="primary" id="checkBtn">Revisar conexiones</button><button class="danger" id="shortBtn">Simular corto</button><button id="resetFaultBtn">Restablecer falla</button></div>
+<div class="field">Modo de simulación<select id="faultType"><option value="short">Cortocircuito</option><option value="open">Circuito abierto</option><option value="ground">Falla a tierra</option></select></div>
+<div id="diagnostics" class="circuit" style="margin-top:10px"><h3>Diagnóstico del simulador</h3><p>Ejecuta una revisión para ver avisos didácticos.</p></div>
+<div class="warning" style="margin-top:12px">Cálculos y fallas únicamente educativos: 127 V nominales y potencias típicas aproximadas. No usar para dimensionar una instalación real ni seleccionar protecciones sin revisión profesional y normativa vigente.</div>
+</div>
+<div id="reportView" class="panel" hidden><h2>Reporte del proyecto</h2><div id="reportContent"></div><div class="actions"><button class="primary" id="printBtn">Exportar / Guardar como PDF</button></div></div>
+<div class="panel"><h2>Conexiones</h2><div id="wireList" class="componentList"><div class="empty">No hay conexiones.</div></div><p class="note">Ahora puedes dibujar fase, neutro y tierra entre el mismo par de elementos. El diagnóstico considera recorridos visuales, apagadores abiertos y pastillas virtuales. No verifica continuidad real, calibre ni cumplimiento normativo.</p></div>
+</section>
+</main>
+<script>
+(()=> {
+const $=id=>document.getElementById(id), canvas=$('plan'),ctx=canvas.getContext('2d');
+let roomW=8,roomH=10,items=[],wires=[],selected=null,mode='select',wireStart=null,breaker={1:true,2:true},tab='plan',nextId=1,faultActive=false,lightStates={},faultKind='short';
+const specs={light:{label:'Foco',icon:'💡',watts:12,circuit:1},switch:{label:'Apagador',icon:'◉',watts:0,circuit:1},outlet:{label:'Contacto',icon:'▣',watts:180,circuit:2},panel:{label:'Tablero',icon:'▤',watts:0,circuit:0},junction:{label:'Registro',icon:'●',watts:0,circuit:0}};
+
+function circuitReachable(){
+ const graph={};items.forEach(i=>graph[i.id]=[]);
+ wires.forEach(w=>{if(graph[w.a]&&graph[w.b]){graph[w.a].push(w.b);graph[w.b].push(w.a)}});
+ const panel=items.find(i=>i.type==='panel');
+ const reached=new Set();
+ if(!panel)return reached;
+ const queue=[panel.id];
+ while(queue.length){
+  const id=queue.shift();if(reached.has(id))continue;reached.add(id);
+  const item=items.find(i=>i.id===id);
+  // An open switch is a break in the educational circuit path.
+  if(item&&item.type==='switch'&&item.closed!==true)continue;
+  (graph[id]||[]).forEach(n=>{if(!reached.has(n))queue.push(n)});
+ }
+ return reached;
+}
+function refreshLightStates(){
+ const reachable=circuitReachable();
+ items.filter(i=>i.type==='light').forEach(light=>{
+  lightStates[light.id]=!!(reachable.has(light.id)&&breaker[1]&&!faultActive);
+ });
+}
+
+function px(x){return 45+x/(roomW)* (canvas.width-90)} function py(y){return 45+y/(roomH)*(canvas.height-90)}
+function draw(){
+ ctx.clearRect(0,0,canvas.width,canvas.height);ctx.fillStyle='#0b1218';ctx.fillRect(0,0,canvas.width,canvas.height);
+ const x0=45,y0=45,w=canvas.width-90,h=canvas.height-90;
+ ctx.strokeStyle='#1c303a';ctx.lineWidth=1;
+ for(let i=0;i<=roomW;i++){let x=x0+i*w/roomW;ctx.beginPath();ctx.moveTo(x,y0);ctx.lineTo(x,y0+h);ctx.stroke()}
+ for(let i=0;i<=roomH;i++){let y=y0+i*h/roomH;ctx.beginPath();ctx.moveTo(x0,y);ctx.lineTo(x0+w,y);ctx.stroke()}
+ ctx.strokeStyle='#a9c0c8';ctx.lineWidth=5;ctx.strokeRect(x0,y0,w,h);
+ ctx.fillStyle='#9eb4bc';ctx.font='16px system-ui';ctx.fillText(`${roomW} m × ${roomH} m`,x0+8,y0-15);
+ if(faultActive){ctx.fillStyle='#ff6b6b';ctx.font='bold 16px system-ui';ctx.fillText('⚠ FALLA SIMULADA: CIRCUITO DESCONECTADO',x0+8,y0+h+28)}
+ wires.forEach(wire=>{let a=items.find(i=>i.id===wire.a),b=items.find(i=>i.id===wire.b);if(!a||!b)return;ctx.beginPath();ctx.moveTo(px(a.x),py(a.y));ctx.lineTo(px(b.x),py(b.y));ctx.strokeStyle=wire.color||'#f7b538';ctx.lineWidth=4;ctx.stroke();ctx.setLineDash([5,5]);ctx.strokeStyle='#101820';ctx.lineWidth=1;ctx.stroke();ctx.setLineDash([])});
+ items.forEach(it=>{let x=px(it.x),y=py(it.y),sp=specs[it.type];ctx.beginPath();ctx.arc(x,y,18,0,Math.PI*2);ctx.fillStyle=it.id===selected?'#f7b538':'#203440';ctx.fill();ctx.strokeStyle=it.id===selected?'#fff1c9':'#688692';ctx.lineWidth=2;ctx.stroke();ctx.fillStyle=it.id===selected?'#17232a':'#edf5f7';ctx.font='18px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(it.type==='light' && lightStates[it.id] ? '✦' : sp.icon,x,y);ctx.textAlign='left';ctx.textBaseline='alphabetic';ctx.fillStyle='#dce8eb';ctx.font='12px system-ui';ctx.fillText(it.name,x-25,y+33)});
+ updateList();updateStats();updateWires();
+}
+function updateList(){let el=$('componentList');if(!items.length){el.innerHTML='<div class="empty">Todavía no hay elementos.</div>';return}el.innerHTML=items.map(i=>`<div class="componentRow"><span>${specs[i.type].icon} ${i.name}</span><button data-select="${i.id}">${i.id===selected?'Elegido':'Elegir'}</button></div>`).join('');el.querySelectorAll('[data-select]').forEach(b=>b.onclick=()=>{selected=+b.dataset.select;draw()})}
+function updateWires(){let el=$('wireList');if(!wires.length){el.innerHTML='<div class="empty">No hay conexiones.</div>';return}el.innerHTML=wires.map((w,n)=>{let a=items.find(i=>i.id===w.a),b=items.find(i=>i.id===w.b);return `<div class="componentRow"><span><i style="color:${w.color}">●</i> ${w.kind||'Fase'}: ${a?.name||'?'} ↔ ${b?.name||'?'}</span><button data-wire="${n}">Quitar</button></div>`}).join('');el.querySelectorAll('[data-wire]').forEach(b=>b.onclick=()=>{wires.splice(+b.dataset.wire,1);draw()})}
+function updateStats(){let lights=items.filter(i=>i.type==='light').length,outlets=items.filter(i=>i.type==='outlet').length;let w1=lights*12,w2=outlets*180,a1=w1/127,a2=w2/127;$('totalW').textContent=(w1+w2)+' W';$('totalA').textContent=(a1+a2).toFixed(2)+' A';$('totalN').textContent=items.length;$('c1info').textContent=`${lights} foco(s) · ${w1} W · ${a1.toFixed(2)} A estimados`; $('c2info').textContent=`${outlets} contacto(s) · ${w2} W estimados* · ${a2.toFixed(2)} A`; $('c1state').textContent=faultActive?'FALLA simulada: circuito interrumpido.':breaker[1]?'Circuito energizado (simulación).':'Circuito desconectado en el tablero virtual.';$('c2state').textContent=faultActive?'FALLA simulada: circuito interrumpido.':breaker[2]?'Circuito energizado (simulación).':'Circuito desconectado en el tablero virtual.'}
+function add(type,x=roomW/2,y=roomH/2){if(type==='wire'){mode='wire';$('modeLabel').textContent='Modo: cable · toca dos elementos';return}let sp=specs[type];if(!sp)return;let n=items.filter(i=>i.type===type).length+1;items.push({id:nextId++,type,x,y,name:sp.label+' '+n,...(type==='switch'?{closed:false}:{})});selected=items.at(-1).id;mode='select';$('modeLabel').textContent='Modo: seleccionar';draw()}
+document.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-add]').forEach(x=>x.classList.remove('active'));b.classList.add('active');let t=b.dataset.add;if(t==='wire'){mode='wire';wireStart=null;$('modeLabel').textContent='Modo: cable · toca dos elementos'}else{mode='add:'+t;$('modeLabel').textContent='Modo: colocar '+specs[t].label.toLowerCase() }});
+canvas.addEventListener('click',e=>{const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;let hit=null;for(let i=items.length-1;i>=0;i--){if(Math.hypot(px(items[i].x)-x,py(items[i].y)-y)<23){hit=items[i];break}}
+ if(mode.startsWith('add:')){let type=mode.slice(4);add(type,Math.max(.3,Math.min(roomW-.3,(x-45)/(canvas.width-90)*roomW)),Math.max(.3,Math.min(roomH-.3,(y-45)/(canvas.height-90)*roomH)));document.querySelectorAll('[data-add]').forEach(x=>x.classList.remove('active'));return}
+ if(mode==='wire'){if(!hit){$('modeLabel').textContent='Modo cable: toca encima de un elemento';return}if(!wireStart){wireStart=hit.id;selected=hit.id;$('modeLabel').textContent='Cable: ahora toca el segundo elemento'}else if(wireStart!==hit.id){const chosenKind=$('wireColor').selectedOptions[0].text.split(' · ')[0];if(!wires.some(w=>((w.a===wireStart&&w.b===hit.id)||(w.a===hit.id&&w.b===wireStart))&&(w.kind||'Fase')===chosenKind))wires.push({a:wireStart,b:hit.id,color:$('wireColor').value,kind:chosenKind});wireStart=null;selected=hit.id;$('modeLabel').textContent='Conexión añadida · toca otros dos elementos'}else{wireStart=null;$('modeLabel').textContent='Selección de cable cancelada'}draw();return}
+ if(hit){selected=hit.id;$('modeLabel').textContent='Seleccionado: '+hit.name}else{selected=null;$('modeLabel').textContent='Modo: seleccionar'}draw()});
+$('deleteBtn').onclick=()=>{if(selected==null)return;items=items.filter(i=>i.id!==selected);wires=wires.filter(w=>w.a!==selected&&w.b!==selected);selected=null;draw()};
+$('clearBtn').onclick=()=>{if(confirm('¿Borrar todos los elementos y conexiones?')){items=[];wires=[];selected=null;draw()}};
+$('resizeBtn').onclick=()=>{roomW=Math.max(2,Math.min(20,+$('roomW').value||8));roomH=Math.max(2,Math.min(20,+$('roomH').value||10));draw()};
+$('b1').onclick=()=>{breaker[1]=!breaker[1];$('b1').textContent=breaker[1]?'CONECTADA':'DESCONECTADA';$('b1').classList.toggle('on',breaker[1]);$('b1').classList.toggle('off',!breaker[1]);refreshLightStates();draw()};
+$('b2').onclick=()=>{breaker[2]=!breaker[2];$('b2').textContent=breaker[2]?'CONECTADA':'DESCONECTADA';$('b2').classList.toggle('on',breaker[2]);$('b2').classList.toggle('off',!breaker[2]);refreshLightStates();draw()};
+$('operateBtn').onclick=()=>{
+ let it=items.find(i=>i.id===selected);
+ if(!it){alert('Selecciona primero un foco o apagador.');return}
+ if(it.type==='switch'){
+  it.closed=it.closed!==true;
+  it.name=it.name.replace(/ \((abierto|cerrado)\)$/,'')+(it.closed?' (cerrado)':' (abierto)');
+  refreshLightStates();draw();
+  $('modeLabel').textContent='Apagador '+(it.closed?'cerrado':'abierto')+' · focos actualizados';
+  return;
+ }
+ if(it.type==='light'){
+  const reachable=circuitReachable();
+  if(faultActive||!breaker[1]){alert('El circuito de iluminación está desconectado. Restablece la falla o conecta la pastilla.');return}
+  if(!reachable.has(it.id)){alert('Este foco no tiene un recorrido visual energizado desde el tablero. Revisa las conexiones y el apagador.');return}
+  alert('El foco se controla desde el apagador conectado en el recorrido del circuito.');
+  return;
+ }
+ alert('Esta acción funciona con focos y apagadores.');
+};
+function diagnose(){
+ let msgs=[],panel=items.find(i=>i.type==='panel');
+ if(!panel)msgs.push('No hay tablero colocado en el plano.');
+ const loads=items.filter(i=>i.type==='light'||i.type==='outlet');
+ if(!loads.length)msgs.push('No hay cargas (focos o contactos) para revisar.');
+ const graph={};items.forEach(i=>graph[i.id]=[]);
+ wires.forEach(w=>{if(graph[w.a]&&graph[w.b]){graph[w.a].push(w.b);graph[w.b].push(w.a)}});
+ const rawReach=new Set();
+ if(panel){const q=[panel.id];while(q.length){const id=q.shift();if(rawReach.has(id))continue;rawReach.add(id);(graph[id]||[]).forEach(n=>{if(!rawReach.has(n))q.push(n)})}}
+ const energized=circuitReachable();
+ loads.forEach(i=>{
+  if(!panel||!rawReach.has(i.id))msgs.push(i.name+' no tiene un recorrido visual conectado al tablero.');
+  else if(i.type==='light'&&!energized.has(i.id))msgs.push(i.name+' está en un recorrido interrumpido; revisa si hay un apagador abierto.');
+  else if(i.type==='outlet'&&!breaker[2])msgs.push(i.name+' pertenece al circuito de contactos, cuya pastilla virtual está desconectada.');
+ });
+ if(faultActive)msgs.push('Hay una falla simulada activa ('+({short:'cortocircuito',open:'circuito abierto',ground:'falla a tierra'}[faultKind]||faultKind)+').');
+ const types={};wires.forEach(w=>types[w.kind||'Fase']=(types[w.kind||'Fase']||0)+1);
+ if(!wires.length)msgs.push('No hay conexiones dibujadas.');
+ if(wires.length&&Object.keys(types).length<3)msgs.push('Tipos de conductor dibujados: '+Object.keys(types).join(', ')+'. Revisa por separado fase, neutro y tierra; el dibujo por sí solo no confirma que estén bien conectados.');
+ if(!breaker[1])msgs.push('La pastilla virtual de iluminación está desconectada.');
+ if(!msgs.length)msgs.push('Revisión visual básica completada. Esto no demuestra continuidad eléctrica ni cumplimiento normativo.');
+ $('diagnostics').innerHTML='<h3>Resultado de revisión</h3><ul class="log">'+msgs.map(m=>'<li>'+m+'</li>').join('')+'</ul>';
+ return msgs;
+}
+$('checkBtn').onclick=()=>{diagnose()};
+$('shortBtn').onclick=()=>{faultActive=true;faultKind=$('faultType').value;if(faultKind==='short'||faultKind==='ground'){breaker[1]=false;breaker[2]=false}else{breaker[1]=false} $('b1').textContent=breaker[1]?'CONECTADA':'DESCONECTADA';$('b2').textContent=breaker[2]?'CONECTADA':'DESCONECTADA';$('b1').classList.toggle('on',breaker[1]);$('b1').classList.toggle('off',!breaker[1]);$('b2').classList.toggle('on',breaker[2]);$('b2').classList.toggle('off',!breaker[2]);let labels={short:'Cortocircuito simulado',open:'Circuito abierto simulado',ground:'Falla a tierra simulada'};$('diagnostics').innerHTML='<h3 style="color:#ff8d8d">⚠ '+labels[faultKind]+'</h3><p>El modelo desconectó las pastillas virtuales según el escenario didáctico. No calcula corriente real de falla ni reproduce un dispositivo de protección certificado.</p>';draw()};
+$('resetFaultBtn').onclick=()=>{faultActive=false;breaker[1]=true;breaker[2]=true;$('b1').textContent='CONECTADA';$('b2').textContent='CONECTADA';$('b1').classList.remove('off');$('b1').classList.add('on');$('b2').classList.remove('off');$('b2').classList.add('on');$('diagnostics').innerHTML='<h3>Diagnóstico del simulador</h3><p>Falla restablecida. Ejecuta una revisión cuando quieras.</p>';refreshLightStates();draw()};
+document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{tab=b.dataset.tab;document.querySelectorAll('[data-tab]').forEach(x=>x.classList.toggle('active',x===b));$('planView').hidden=tab!=='plan';$('circuitView').hidden=tab!=='circuits';$('reportView').hidden=tab!=='report';if(tab==='report')makeReport()});
+
+let dragging=null;
+canvas.addEventListener('pointerdown',e=>{if(mode!=='select')return;const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;let hit=null;for(let i=items.length-1;i>=0;i--){if(Math.hypot(px(items[i].x)-x,py(items[i].y)-y)<23){hit=items[i];break}}if(hit){dragging=hit.id;selected=hit.id;canvas.setPointerCapture(e.pointerId);draw()}});
+canvas.addEventListener('pointermove',e=>{if(dragging===null)return;const r=canvas.getBoundingClientRect(),x=(e.clientX-r.left)*canvas.width/r.width,y=(e.clientY-r.top)*canvas.height/r.height;let it=items.find(i=>i.id===dragging);if(!it)return;it.x=Math.max(.3,Math.min(roomW-.3,(x-45)/(canvas.width-90)*roomW));it.y=Math.max(.3,Math.min(roomH-.3,(y-45)/(canvas.height-90)*roomH));draw()});
+canvas.addEventListener('pointerup',()=>{dragging=null});
+canvas.addEventListener('pointercancel',()=>{dragging=null});
+
+function state(){return {roomW,roomH,items,wires,breaker,nextId,lightStates,faultActive,faultKind}}
+function restore(s){roomW=s.roomW||8;roomH=s.roomH||10;items=s.items||[];wires=s.wires||[];breaker=s.breaker||{1:true,2:true};lightStates=s.lightStates||{};faultActive=!!s.faultActive;faultKind=s.faultKind||'short';nextId=s.nextId||items.length+1;$('roomW').value=roomW;$('roomH').value=roomH;selected=null;draw()}
+$('saveBtn').onclick=()=>{try{localStorage.setItem('electricasa-project',JSON.stringify(state()));alert('Proyecto guardado en este dispositivo.')}catch(e){alert('No se pudo guardar en este navegador. Usa el reporte para imprimir o guardar en PDF.')}};
+try{let s=localStorage.getItem('electricasa-project');if(s&&confirm('Se encontró un proyecto guardado. ¿Quieres abrirlo?'))restore(JSON.parse(s))}catch(e){}
+function makeReport(){let lights=items.filter(i=>i.type==='light').length,outlets=items.filter(i=>i.type==='outlet').length;let watts=lights*12+outlets*180;let rows=items.map(i=>`<tr><td>${i.name}</td><td>${specs[i.type].label}</td><td>${specs[i.type].watts} W (referencia)</td><td>${i.x.toFixed(1)}, ${i.y.toFixed(1)} m</td></tr>`).join('');$('reportContent').innerHTML=`<p><b>Proyecto:</b> Instalación residencial didáctica</p><p><b>Dimensiones:</b> ${roomW} × ${roomH} m</p><p><b>Elementos:</b> ${items.length} · <b>Conexiones dibujadas:</b> ${wires.length}</p><p><b>Carga estimada:</b> ${watts} W · <b>Corriente a 127 V:</b> ${(watts/127).toFixed(2)} A</p><table style="width:100%;border-collapse:collapse;font-size:12px"><thead><tr><th align="left">Elemento</th><th align="left">Tipo</th><th align="left">Potencia</th><th align="left">Posición</th></tr></thead><tbody>${rows||'<tr><td colspan="4">Sin elementos</td></tr>'}</tbody></table><p style="margin-top:16px"><b>Nota:</b> Documento educativo. No constituye memoria de cálculo ni plano constructivo validado.</p>`}
+$('printBtn').onclick=()=>window.print();
+
+function downloadJSON(filename, obj){
+ const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+ const url=URL.createObjectURL(blob),a=document.createElement('a');
+ a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();
+ setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+$('exportBtn').onclick=()=>{
+ const stamp=new Date().toISOString().slice(0,10);
+ downloadJSON('ElectriCasa-respaldo-'+stamp+'.json',{app:'ElectriCasa',version:'0.6',savedAt:new Date().toISOString(),project:state()});
+};
+$('importBtn').onclick=()=>$('importFile').click();
+$('importFile').onchange=async e=>{
+ const file=e.target.files&&e.target.files[0];if(!file)return;
+ try{
+  const raw=JSON.parse(await file.text()),s=raw.project||raw;
+  if(!s||!Array.isArray(s.items)||!Array.isArray(s.wires)||!Number.isFinite(+s.roomW)||!Number.isFinite(+s.roomH))throw new Error('Formato inválido');
+  const allowed=new Set(Object.keys(specs));
+  if(s.items.some(i=>!allowed.has(i.type)||!Number.isFinite(+i.x)||!Number.isFinite(+i.y)||!Number.isFinite(+i.id)))throw new Error('Hay elementos inválidos');
+  const ids=new Set(s.items.map(i=>+i.id));
+  if(s.wires.some(w=>!ids.has(+w.a)||!ids.has(+w.b)))throw new Error('Hay cables sin elementos de destino');
+  if(!confirm('¿Reemplazar el plano actual con el respaldo seleccionado?'))return;
+  restore({...s,roomW:Math.max(2,Math.min(20,+s.roomW)),roomH:Math.max(2,Math.min(20,+s.roomH))});
+  alert('Respaldo importado correctamente.');
+ }catch(err){alert('No se pudo importar. Verifica que sea un respaldo JSON de ElectriCasa.');}
+ finally{e.target.value='';}
+};
+
+document.addEventListener('keydown',e=>{if((e.key==='Delete'||e.key==='Backspace')&&selected!==null&&tab==='plan'&&document.activeElement.tagName!=='INPUT'){items=items.filter(i=>i.id!==selected);wires=wires.filter(w=>w.a!==selected&&w.b!==selected);selected=null;draw()}});
+draw();
+})();
+</script>
+</body></html>
